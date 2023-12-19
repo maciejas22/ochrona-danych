@@ -41,7 +41,7 @@ export async function loginUserHandler(
         path: '/',
         sameSite: 'none',
         secure: false,
-        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       })
       .code(200)
       .send({ id: user.id, username: user.username });
