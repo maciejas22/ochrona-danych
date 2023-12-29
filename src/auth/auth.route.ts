@@ -1,6 +1,12 @@
-import { FastifyInstance } from 'fastify'
-import { $ref } from './auth.schema'
-import { loginUserHandler, registerUserHandler } from './auth.controller'
+import { type FastifyInstance } from 'fastify';
+
+import {
+  checkPartialPassword,
+  entropyHandler,
+  loginUserHandler,
+  registerUserHandler,
+} from './auth.controller';
+import { $ref } from './auth.schema';
 
 const authRoutes = async (server: FastifyInstance) => {
   server.post(
@@ -14,7 +20,7 @@ const authRoutes = async (server: FastifyInstance) => {
       },
     },
     registerUserHandler,
-  )
+  );
 
   server.post(
     '/login',
@@ -27,7 +33,22 @@ const authRoutes = async (server: FastifyInstance) => {
       },
     },
     loginUserHandler,
-  )
-}
+  );
 
-export default authRoutes
+  server.post(
+    '/entropy',
+    {
+      schema: {
+        body: $ref('entropySchema'),
+        response: {
+          200: $ref('entropyResponseSchema'),
+        },
+      },
+    },
+    entropyHandler,
+  );
+
+  server.post('/check-partial-password', checkPartialPassword);
+};
+
+export default authRoutes;

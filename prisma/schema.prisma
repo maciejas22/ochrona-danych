@@ -16,13 +16,19 @@ enum Status {
 }
 
 model User {
-  id                   Int     @id @default(autoincrement())
+  id                   String     @id @default(uuid())
   name                 String?
   surname              String?
   email                String? @unique
   username             String  @unique
   password             String
+  balance              Float   @default(0)
+  partialPassword      String
   invalidPasswordCount Int     @default(0)
   status               Status  @default(ACTIVE)
+  iv                   String  
+  KEKSalt              String
+  DEK                  String
+  DEKReset             String
 }
 

@@ -6,6 +6,8 @@ import Fastify from 'fastify';
 
 import authRoutes from './auth/auth.route';
 import { authSchemas } from './auth/auth.schema';
+import userRoutes from './user/user.route';
+import { userSchemas } from './user/user.schema';
 
 export default function buildServer() {
   const server = Fastify({
@@ -21,21 +23,23 @@ export default function buildServer() {
     credentials: true,
   });
 
-  server.register(fastifyCookie, {
-    secret: process.env.COOKIE_SECRET as string,
-  });
+  server.register(fastifyCookie, {});
 
   server.register(fastifyJWT, {
     secret: process.env.JWT_SECRET as string,
     sign: { algorithm: 'HS256' },
     cookie: {
-      cookieName: 'token',
+      cookieName: 'accessToken',
       signed: false,
     },
   });
 
-  server.addHook('onRequest', async (request, reply) => {
-    const accessToken = request.cookies['token'];
+  for (const schema of [...authSchemas, ...userSchemas]) {
+    server.addSchema(schema);
+  }
+
+  server.addHook('preValidation', async (request, reply) => {
+    const accessToken = request.cookies['accessToken'];
 
     if (
       (!accessToken || !(await request.jwtVerify())) &&
@@ -45,10 +49,8 @@ export default function buildServer() {
     }
   });
 
-  for (const schema of [...authSchemas]) {
-    server.addSchema(schema);
-  }
   server.register(authRoutes, { prefix: '/auth' });
+  server.register(userRoutes, { prefix: '/user' });
 
   return server;
 }

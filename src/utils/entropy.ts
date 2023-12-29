@@ -21,14 +21,14 @@ export function calcEntropy(text: string) {
   };
 }
 
-function getStrength(entropy: number): 'weak' | 'medium' | 'strong' {
+function getStrength(entropy: number) {
   if (entropy < 2.5) {
-    return 'weak';
+    return 'WEAK';
   }
 
   if (entropy < 3.5) {
-    return 'medium';
+    return 'MEDIUM';
   }
 
-  return 'strong';
+  return 'STRONG';
 }
