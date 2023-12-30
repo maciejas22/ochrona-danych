@@ -1,21 +1,10 @@
-import axios from 'axios';
-import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 
-import { IUser } from '../../types/user';
+import { useUser } from '../../hooks/use-user';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-
-  const { mutate: loginMutation, isLoading } = useMutation({
-    mutationFn: async (user: { username: string; password: string }) => {
-      const response = await axios.post<IUser>('/auth/login', user);
-      return response.data;
-    },
-    onSuccess: () => {
-      navigate('/');
-    },
-  });
+  const { login, isLoading, error } = useUser();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,20 +12,49 @@ export default function LoginPage() {
     const username = (elements.namedItem('username') as HTMLInputElement).value;
     const password = (elements.namedItem('password') as HTMLInputElement).value;
 
-    try {
-      loginMutation({ username, password });
-    } catch (error) {
-      console.error('Login failed', error);
-    }
+    login({ user: { username, password }, onSuccess: () => navigate('/') });
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" name="username" />
-      <input type="password" name="password" />
-      <button type="submit" disabled={isLoading}>
-        {isLoading ? 'Logging in...' : 'Login'}
-      </button>
-    </form>
+    <div className="flex h-screen items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 rounded-xl border border-black p-8"
+      >
+        <div className="flex justify-between gap-2">
+          <p>username:</p>
+          <input
+            type="text"
+            name="username"
+            className="rounded-md border border-black"
+          />
+        </div>
+        <div className="flex justify-between gap-2">
+          <p>password:</p>
+          <input
+            type="password"
+            name="password"
+            className="rounded-md border border-black"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="rounded-md border border-black"
+        >
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
+        {error && (
+          <div className="font-bold text-red-600">
+            {(error.response?.data as { message: string })?.message ??
+              error.message}
+          </div>
+        )}
+      </form>
+    </div>
   );
 }

@@ -1,11 +1,11 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { calcEntropy } from '../utils/entropy';
-import { verifyPartialPassword } from '../utils/hash';
+import { comparePassword, verifyPartialPassword } from '../utils/hash';
 
 import { JWTPayloadType } from '../config/jwtConfig';
 import { EntropyInput, LoginUserInput, RegisterUserInput } from './auth.schema';
-import { createUser, findUserByUsername, loginUser } from './auth.service';
+import { createUser, findUserByUsername, incrementInvalidPasswordCount, resetInvalidPasswordCount, resetPartialPassword } from './auth.service';
 
 export async function registerUserHandler(
   request: FastifyRequest<{
@@ -14,11 +14,16 @@ export async function registerUserHandler(
   reply: FastifyReply,
 ) {
   const body = request.body;
+  let user = await findUserByUsername(request.body.username);
+  if (user) {
+    return reply.code(400).send({ message: 'User already exists' });
+  }
+
   try {
-    const user = await createUser(body);
+    user = await createUser(body);
     return reply.code(200).send(user);
   } catch (err) {
-    return reply.code(500).send(err);
+    return reply.code(500).send('Internal server error');
   }
 }
 
@@ -43,7 +48,7 @@ export async function checkPartialPassword(
     );
     return reply.code(200).send({ isMatch });
   } catch (err) {
-    return reply.code(500).send(err);
+    return reply.code(500).send('Internal server error');
   }
 }
 
@@ -56,7 +61,20 @@ export async function loginUserHandler(
   const body = request.body;
 
   try {
-    const user = await loginUser(body);
+    const user = await findUserByUsername(body.username);
+    if (!user) {
+      return reply.code(404).send({ message: 'User not found' });
+    }
+
+    const isPasswordMatch = comparePassword(body.password, user.password);
+    if (!isPasswordMatch) {
+      incrementInvalidPasswordCount(user);
+      return reply.code(400).send({ message: 'Invalid password' });
+    }
+
+    resetInvalidPasswordCount(user);
+    resetPartialPassword(user, body.password);
+
     const payload: JWTPayloadType = {
       id: user.id,
       username: user.username,
@@ -75,8 +93,19 @@ export async function loginUserHandler(
       .code(200)
       .send(user);
   } catch (err) {
-    return reply.code(500).send(err);
+    return reply.code(500).send('Internal server error');
   }
+}
+
+export async function logoutUserHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  reply.clearCookie('accessToken', {
+    domain: 'localhost',
+    path: '/',
+  });
+  return reply.code(200).send({ message: 'Logout successful' });
 }
 
 export async function entropyHandler(
@@ -91,6 +120,6 @@ export async function entropyHandler(
     const entropy = calcEntropy(body.password).entropy;
     return reply.code(200).send({ entropy });
   } catch (err) {
-    return reply.code(500).send(err);
+    return reply.code(500).send('Internal server error');
   }
 }

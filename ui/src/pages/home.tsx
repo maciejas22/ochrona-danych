@@ -1,31 +1,25 @@
-import axios from 'axios';
-import { useQuery } from 'react-query';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
-import { IUser } from '../types/user';
+import Header from '../components/header';
+import { useUser } from '../hooks/use-user';
 
 export default function HomePage() {
-  const navigate = useNavigate();
-  const { data, isLoading, error } = useQuery({
-    queryKey: 'user',
-    queryFn: async () => {
-      const response = await axios.get<IUser>('/user/user');
-      return response.data;
-    },
-    onSuccess: (data) => {
-      if (!data) {
-        navigate('/login');
-      }
-    },
-  });
+  const { user, isLoading, getUser } = useUser();
+
+  useEffect(() => {
+    getUser({});
+  }, []);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>Error</div>;
-  }
-
-  return <div>{data?.username}</div>;
+  return (
+    <>
+      <Header />
+      <div className="mx-4 my-2">
+        <p>Account Balance: {user?.balance}$</p>
+      </div>
+    </>
+  );
 }

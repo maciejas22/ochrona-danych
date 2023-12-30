@@ -58,33 +58,7 @@ export const findUserByUsername = async (username: string) => {
   });
 };
 
-export const loginUser = async (input: LoginUserInput) => {
-  const user = await findUserByUsername(input.username);
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  const isPasswordMatch = comparePassword(input.password, user.password);
-  if (!isPasswordMatch) {
-    incrementInvalidPasswordCount(user);
-    throw new Error('Invalid password');
-  }
-
-  resetInvalidPasswordCount(user);
-  const { partialPassword, DEK } = resetPartialPassword(user, input.password);
-
-  return prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      partialPassword,
-      DEK,
-    },
-  });
-};
-
-const incrementInvalidPasswordCount = async (user: User) => {
+export const incrementInvalidPasswordCount = async (user: User) => {
   return prisma.user.update({
     where: {
       id: user.id,
@@ -96,7 +70,7 @@ const incrementInvalidPasswordCount = async (user: User) => {
   });
 };
 
-const resetInvalidPasswordCount = async (user: User) => {
+export const resetInvalidPasswordCount = async (user: User) => {
   return prisma.user.update({
     where: {
       id: user.id,
@@ -108,14 +82,20 @@ const resetInvalidPasswordCount = async (user: User) => {
   });
 };
 
-const resetPartialPassword = (user: User, password: string) => {
+export const resetPartialPassword = (user: User, password: string) => {
   const { iv, KEKSalt } = user;
   const { partialPassword, hash } = generatePartialPassword(password);
   const KEK = getKEK(partialPassword, KEKSalt);
   const DEKRaw = decrypt(user.DEKReset, iv, process.env.ADMIN_SECRET!);
   const DEK = encrypt(DEKRaw, iv, KEK);
-  return {
-    partialPassword: hash,
-    DEK,
-  };
+
+  return prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      partialPassword,
+      DEK,
+    },
+  });
 };
