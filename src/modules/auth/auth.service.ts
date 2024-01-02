@@ -6,18 +6,21 @@ import {
   generateIV,
   generateKey,
   getKEK,
-} from '../utils/encrypt';
+} from '../../utils/encrypt';
 import {
-  comparePassword,
   generatePartialPassword,
   generateSalt,
   hashPassword,
-} from '../utils/hash';
-import prisma from '../utils/prisma';
+} from '../../utils/hash';
 
-import { LoginUserInput, RegisterUserInput } from './auth.schema';
+import { prisma } from '../../plugins/prisma';
 
-export const createUser = async (input: RegisterUserInput) => {
+export const createUser = async (input: {
+  username: string;
+  password: string;
+  name: string;
+  surname: string;
+}) => {
   const passwordHash = hashPassword(input.password);
   const { partialPassword, hash: partialPasswordHash } =
     generatePartialPassword(input.password);
@@ -31,7 +34,10 @@ export const createUser = async (input: RegisterUserInput) => {
 
   return prisma.user.create({
     data: {
+      accountNumber: generateAccountNumber(),
       username: input.username,
+      name: input.name,
+      surname: input.surname,
       password: passwordHash.salt + passwordHash.hash,
       partialPassword: partialPasswordHash,
       iv,
@@ -98,4 +104,12 @@ export const resetPartialPassword = (user: User, password: string) => {
       DEK,
     },
   });
+};
+
+const generateAccountNumber = () => {
+  const accountNumber = Math.floor(Math.random() * 9000000000) + 1000000000;
+
+  const accountNumberString = accountNumber.toString();
+
+  return accountNumberString;
 };

@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { ReactNode, createContext, useState } from 'react';
+import { ReactNode, createContext, useEffect, useState } from 'react';
 import { useMutation } from 'react-query';
 
 import { IUser } from '../../types/user';
@@ -11,6 +11,8 @@ interface ILoginBody {
 
 interface IRegisterBody {
   username: string;
+  name: string;
+  surname: string;
   password: string;
 }
 
@@ -64,8 +66,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<AxiosError | undefined>(undefined);
 
+  useEffect(() => {
+    setTimeout(() => {
+      setError(undefined);
+    }, 3000);
+  }, [error]);
+
   const loginMutation = useMutation<AuthResponse, AxiosError, ILoginBody>({
-    mutationFn: (user: ILoginBody) => {
+    mutationKey: 'login',
+    mutationFn: async (user: ILoginBody) => {
       setIsLoading(true);
       setError(undefined);
       return axios.post('/auth/login', user).then((res) => res.data);
@@ -102,7 +111,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation<AuthResponse, AxiosError, IRegisterBody>(
     {
-      mutationFn: (user: IRegisterBody) => {
+      mutationKey: 'register',
+      mutationFn: async (user: IRegisterBody) => {
         setIsLoading(true);
         setError(undefined);
         return axios.post('/auth/register', user).then((res) => res.data);
@@ -136,13 +146,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }
 
   const getUserMutation = useMutation<IUser, AxiosError, null>({
-    mutationFn: () => {
+    mutationKey: 'getUser',
+    mutationFn: async () => {
       setIsLoading(true);
-      setError(undefined);
-      return axios.get('/user/user').then((res) => res.data);
-    },
-    onError: (error) => {
-      setError(error);
+      return axios.get('/user').then((res) => res.data);
     },
     onSettled: () => {
       setIsLoading(false);
@@ -168,7 +175,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }
 
   const logoutUserMutation = useMutation<void, AxiosError, null>({
-    mutationFn: () => {
+    mutationKey: 'logoutUser',
+    mutationFn: async () => {
       setIsLoading(true);
       setError(undefined);
       return axios.post('/auth/logout').then((res) => res.data);

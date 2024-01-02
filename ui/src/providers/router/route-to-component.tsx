@@ -1,6 +1,8 @@
 import Login from '../../pages/auth/login';
 import Register from '../../pages/auth/register';
 import Home from '../../pages/home';
+import CreateTransaction from '../../pages/transaction/create';
+import TransactionHistory from '../../pages/transaction/history';
 import paths from './routes';
 
 interface Route {
@@ -24,6 +26,16 @@ const routes: Route[] = [
     url: paths.register,
     component: <Register />,
     title: 'Register',
+  },
+  {
+    url: paths.transactionHistory,
+    component: <TransactionHistory />,
+    title: 'Transaction History',
+  },
+  {
+    url: paths.newTransaction,
+    component: <CreateTransaction />,
+    title: 'New Transaction',
   },
 ];
 

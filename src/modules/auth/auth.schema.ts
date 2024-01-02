@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { buildJsonSchemas } from 'fastify-zod';
 
-const userCore = {
+const userCore = z.object({
   username: z
     .string({
       required_error: 'Username is required',
@@ -15,29 +15,24 @@ const userCore = {
       invalid_type_error: 'Password must be a string',
     })
     .min(2, 'Password must be at least 8 character long'),
-};
+});
 
-const { password, ...userCoreWithoutSensitive } = userCore;
-const userWithoutSensitive = {
+const userCoreWithoutSensitive = userCore.omit({ password: true });
+
+const userWithoutSensitive = userCoreWithoutSensitive.extend({
   id: z.string().uuid(),
-  ...userCoreWithoutSensitive,
-};
-
-const registerUserSchema = z.object({
-  ...userCore,
 });
 
-const registerUserResponseSchema = z.object({
-  ...userWithoutSensitive,
+const registerUserSchema = userCore.extend({
+  name: z.string().min(2, 'Name must be at least 2 character long'),
+  surname: z.string().min(2, 'Surname must be at least 2 character long'),
 });
 
-const loginUserSchema = z.object({
-  ...userCore,
-});
+const registerUserResponseSchema = userWithoutSensitive.extend({});
 
-const loginUserResponseSchema = z.object({
-  ...userWithoutSensitive,
-});
+const loginUserSchema = userCore.extend({});
+
+const loginUserResponseSchema = userWithoutSensitive.extend({});
 
 const entropySchema = z.object({
   password: z.string(),

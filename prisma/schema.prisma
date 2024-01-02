@@ -17,18 +17,41 @@ enum Status {
 
 model User {
   id                   String     @id @default(uuid())
-  name                 String?
-  surname              String?
-  email                String? @unique
-  username             String  @unique
+  name                 String
+  surname              String
+  username             String     @unique
   password             String
-  balance              Float   @default(0)
+  balance              Float      @default(0)
   partialPassword      String
-  invalidPasswordCount Int     @default(0)
-  status               Status  @default(ACTIVE)
+  invalidPasswordCount Int        @default(0)
+  status               Status     @default(ACTIVE)
   iv                   String  
   KEKSalt              String
   DEK                  String
   DEKReset             String
+  cards                Card[]
+  accountNumber        String     @unique
+  sentTransactions     Transaction[] @relation("SenderTransaction")
+  receivedTransactions Transaction[] @relation("ReceiverTransaction")
 }
 
+model Card {
+  id              String    @id @default(uuid())
+  cardNumber      String
+  cardHolderName  String
+  expirationDate  String
+  cvv             String
+  user            User      @relation(fields: [userId], references: [id])
+  userId          String
+}
+
+model Transaction {
+  id           String    @id @default(uuid())
+  title        String
+  amount       Float
+  sender       User      @relation("SenderTransaction", fields: [senderId], references: [id])
+  senderId     String
+  receiver     User      @relation("ReceiverTransaction", fields: [receiverId], references: [id])
+  receiverId   String
+  timestamp    DateTime  @default(now())
+}

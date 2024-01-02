@@ -1,11 +1,16 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { calcEntropy } from '../utils/entropy';
-import { comparePassword, verifyPartialPassword } from '../utils/hash';
+import { calcEntropy } from '../../utils/entropy';
+import { comparePassword, verifyPartialPassword } from '../../utils/hash';
 
-import { JWTPayloadType } from '../config/jwtConfig';
 import { EntropyInput, LoginUserInput, RegisterUserInput } from './auth.schema';
-import { createUser, findUserByUsername, incrementInvalidPasswordCount, resetInvalidPasswordCount, resetPartialPassword } from './auth.service';
+import {
+  createUser,
+  findUserByUsername,
+  incrementInvalidPasswordCount,
+  resetInvalidPasswordCount,
+  resetPartialPassword,
+} from './auth.service';
 
 export async function registerUserHandler(
   request: FastifyRequest<{
@@ -75,12 +80,11 @@ export async function loginUserHandler(
     resetInvalidPasswordCount(user);
     resetPartialPassword(user, body.password);
 
-    const payload: JWTPayloadType = {
+    const token = await reply.jwtSign({
       id: user.id,
       username: user.username,
       iat: Date.now(),
-    };
-    const token = await reply.jwtSign(payload);
+    });
     reply
       .setCookie('accessToken', token, {
         domain: 'localhost',

@@ -8,7 +8,6 @@ import {
   registerUserHandler,
 } from './auth.controller';
 import { $ref } from './auth.schema';
-import { log } from 'console';
 
 const authRoutes = async (server: FastifyInstance) => {
   server.post(
@@ -50,10 +49,7 @@ const authRoutes = async (server: FastifyInstance) => {
     entropyHandler,
   );
 
-  server.post(
-    '/logout',
-    logoutUserHandler,
-  );
+  server.post('/logout', logoutUserHandler);
 
   server.post('/check-partial-password', checkPartialPassword);
 };

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 import { useUser } from '../../hooks/use-user';
+import paths from '../../providers/router/routes';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -12,7 +13,10 @@ export default function LoginPage() {
     const username = (elements.namedItem('username') as HTMLInputElement).value;
     const password = (elements.namedItem('password') as HTMLInputElement).value;
 
-    login({ user: { username, password }, onSuccess: () => navigate('/') });
+    login({
+      user: { username, password },
+      onSuccess: () => navigate(paths.home),
+    });
   };
 
   if (isLoading) {

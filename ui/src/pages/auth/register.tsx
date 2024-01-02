@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useDebounce } from '../../hooks/use-debounce';
 import { useUser } from '../../hooks/use-user';
+import paths from '../../providers/router/routes';
 
 interface IEntropyBody {
   password: string;
@@ -51,11 +52,13 @@ export default function RegisterPage() {
     event.preventDefault();
     const { elements } = event.currentTarget;
     const username = (elements.namedItem('username') as HTMLInputElement).value;
+    const name = (elements.namedItem('name') as HTMLInputElement).value;
+    const surname = (elements.namedItem('surname') as HTMLInputElement).value;
     const password = (elements.namedItem('password') as HTMLInputElement).value;
 
     register({
-      user: { username, password },
-      onSuccess: () => navigate('/login'),
+      user: { username, name, surname, password },
+      onSuccess: () => navigate(paths.login),
     });
   };
 
@@ -70,6 +73,22 @@ export default function RegisterPage() {
           <input
             type="text"
             name="username"
+            className="rounded-md border border-black"
+          />
+        </div>
+        <div className="flex justify-between gap-2">
+          <p>name:</p>
+          <input
+            type="text"
+            name="name"
+            className="rounded-md border border-black"
+          />
+        </div>
+        <div className="flex justify-between gap-2">
+          <p>surname:</p>
+          <input
+            type="text"
+            name="surname"
             className="rounded-md border border-black"
           />
         </div>
