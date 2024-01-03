@@ -13,10 +13,7 @@ export default function LoginPage() {
     const username = (elements.namedItem('username') as HTMLInputElement).value;
     const password = (elements.namedItem('password') as HTMLInputElement).value;
 
-    login({
-      user: { username, password },
-      onSuccess: () => navigate(paths.home),
-    });
+    login({ username, password }, { onSuccess: () => navigate(paths.home) });
   };
 
   if (isLoading) {

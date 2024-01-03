@@ -1,5 +1,8 @@
-import axios, { AxiosError } from 'axios';
 import { useMutation } from 'react-query';
+
+import { AxiosError } from 'axios';
+
+import axios from '../../utils/axios';
 
 import { ITransaction } from '../../types/transaction';
 
@@ -17,7 +20,7 @@ export default function CreateTransaction() {
   >({
     mutationKey: 'createTransaction',
     mutationFn: async (body) => {
-      return axios.post('/transaction/new', body).then((res) => res.data);
+      return axios.post('/transaction/new', body);
     },
   });
 

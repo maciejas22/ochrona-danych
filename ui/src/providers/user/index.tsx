@@ -1,6 +1,9 @@
-import axios, { AxiosError } from 'axios';
 import { ReactNode, createContext, useEffect, useState } from 'react';
 import { useMutation } from 'react-query';
+
+import { AxiosError } from 'axios';
+
+import axios from '../../utils/axios';
 
 import { IUser } from '../../types/user';
 
@@ -21,40 +24,18 @@ interface AuthResponse {
   username: string;
 }
 
+interface IActionHandlers {
+  onSuccess?: () => void;
+  onError?: () => void;
+}
+
 interface IUserContext {
+  login: (user: ILoginBody, handlers?: IActionHandlers) => void;
+  register: (user: IRegisterBody, handlers?: IActionHandlers) => void;
+  getUser: (handlers?: IActionHandlers) => void;
+  logoutUser: (handlers?: IActionHandlers) => void;
+
   user: IUser | undefined;
-  login: ({
-    user,
-    onSuccess,
-    onError,
-  }: {
-    user: ILoginBody;
-    onSuccess?: () => void;
-    onError?: () => void;
-  }) => void;
-  register: ({
-    user,
-    onSuccess,
-    onError,
-  }: {
-    user: IRegisterBody;
-    onSuccess?: () => void;
-    onError?: () => void;
-  }) => void;
-  getUser: ({
-    onSuccess,
-    onError,
-  }: {
-    onSuccess?: () => void;
-    onError?: () => void;
-  }) => void;
-  logoutUser: ({
-    onSuccess,
-    onError,
-  }: {
-    onSuccess?: () => void;
-    onError?: () => void;
-  }) => void;
   isLoading: boolean;
   error: AxiosError | undefined;
 }
@@ -77,7 +58,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     mutationFn: async (user: ILoginBody) => {
       setIsLoading(true);
       setError(undefined);
-      return axios.post('/auth/login', user).then((res) => res.data);
+      return axios.post('/auth/login', user);
     },
     onError: (error) => {
       setError(error);
@@ -90,21 +71,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  function login({
-    user,
-    onSuccess,
-    onError,
-  }: {
-    user: ILoginBody;
-    onSuccess?: () => void;
-    onError?: () => void;
-  }) {
+  function login(user: ILoginBody, handlers?: IActionHandlers) {
     loginMutation.mutate(user, {
       onSuccess: () => {
-        onSuccess && onSuccess();
+        handlers?.onSuccess?.();
       },
       onError: () => {
-        onError && onError();
+        handlers?.onError?.();
       },
     });
   }
@@ -115,7 +88,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       mutationFn: async (user: IRegisterBody) => {
         setIsLoading(true);
         setError(undefined);
-        return axios.post('/auth/register', user).then((res) => res.data);
+        return axios.post('/auth/register', user);
       },
       onError: (error) => {
         setError(error);
@@ -126,21 +99,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     },
   );
 
-  function register({
-    user,
-    onSuccess,
-    onError,
-  }: {
-    user: IRegisterBody;
-    onSuccess?: () => void;
-    onError?: () => void;
-  }) {
+  function register(user: IRegisterBody, handlers?: IActionHandlers) {
     registerMutation.mutate(user, {
       onSuccess: () => {
-        onSuccess && onSuccess();
+        handlers?.onSuccess?.();
       },
       onError: () => {
-        onError && onError();
+        handlers?.onError?.();
       },
     });
   }
@@ -149,27 +114,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
     mutationKey: 'getUser',
     mutationFn: async () => {
       setIsLoading(true);
-      return axios.get('/user').then((res) => res.data);
+      return axios.get('/user');
     },
     onSettled: () => {
       setIsLoading(false);
     },
   });
 
-  function getUser({
-    onSuccess,
-    onError,
-  }: {
-    onSuccess?: () => void;
-    onError?: () => void;
-  }) {
+  function getUser(handlers?: IActionHandlers) {
     getUserMutation.mutate(null, {
       onSuccess: (data) => {
         setUser(data);
-        onSuccess && onSuccess();
+        handlers?.onSuccess?.();
       },
       onError: () => {
-        onError && onError();
+        handlers?.onError?.();
       },
     });
   }
@@ -179,7 +138,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     mutationFn: async () => {
       setIsLoading(true);
       setError(undefined);
-      return axios.post('/auth/logout').then((res) => res.data);
+      return axios.post('/auth/logout');
     },
     onError: (error) => {
       setError(error);
@@ -192,29 +151,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  function logoutUser({
-    onSuccess,
-    onError,
-  }: {
-    onSuccess?: () => void;
-    onError?: () => void;
-  }) {
+  function logoutUser(handlers?: IActionHandlers) {
     logoutUserMutation.mutate(null, {
       onSuccess: () => {
-        onSuccess && onSuccess();
+        handlers?.onSuccess?.();
       },
       onError: () => {
-        onError && onError();
+        handlers?.onError?.();
       },
     });
   }
 
   const contextValue: IUserContext = {
-    user,
     login,
     register,
     getUser,
     logoutUser,
+    user,
     isLoading,
     error,
   };

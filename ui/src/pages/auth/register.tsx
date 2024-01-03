@@ -1,7 +1,10 @@
-import axios, { AxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import { MutationFunction, useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
+
+import { AxiosError } from 'axios';
+
+import axios from '../../utils/axios';
 
 import { useDebounce } from '../../hooks/use-debounce';
 import { useUser } from '../../hooks/use-user';
@@ -19,8 +22,7 @@ const entropyMutationService: MutationFunction<
   IEntropyResponse,
   IEntropyBody
 > = async (entropy) => {
-  const response = await axios.post('/auth/entropy', entropy);
-  return response.data;
+  return axios.post('/auth/entropy', entropy);
 };
 
 export default function RegisterPage() {
@@ -56,10 +58,17 @@ export default function RegisterPage() {
     const surname = (elements.namedItem('surname') as HTMLInputElement).value;
     const password = (elements.namedItem('password') as HTMLInputElement).value;
 
-    register({
-      user: { username, name, surname, password },
-      onSuccess: () => navigate(paths.login),
-    });
+    register(
+      {
+        username,
+        name,
+        surname,
+        password,
+      },
+      {
+        onSuccess: () => navigate(paths.login),
+      },
+    );
   };
 
   return (

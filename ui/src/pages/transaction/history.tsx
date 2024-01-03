@@ -1,5 +1,8 @@
-import axios, { AxiosError } from 'axios';
 import { useQuery } from 'react-query';
+
+import { AxiosError } from 'axios';
+
+import axios from '../../utils/axios';
 
 import { ITransaction } from '../../types/transaction';
 
@@ -7,7 +10,7 @@ export default function TransactionHistory() {
   const { data, isLoading, error } = useQuery<ITransaction[], AxiosError>({
     queryKey: 'transactionHistory',
     queryFn: async () => {
-      return axios.get('/transaction/history').then((res) => res.data);
+      return axios.get('/transaction/history');
     },
   });
 

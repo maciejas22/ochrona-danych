@@ -7,36 +7,37 @@ import paths from './routes';
 
 interface Route {
   url: (typeof paths)[keyof typeof paths];
-  component: JSX.Element;
+  component: () => JSX.Element;
   title?: string;
 }
 
-const routes: Route[] = [
-  {
-    url: paths.home,
-    component: <Home />,
-    title: 'Home',
-  },
+export const publicRoutes: Route[] = [
   {
     url: paths.login,
-    component: <Login />,
+    component: Login,
     title: 'Login',
   },
   {
     url: paths.register,
-    component: <Register />,
+    component: Register,
     title: 'Register',
+  },
+];
+
+export const privateRoutes: Route[] = [
+  {
+    url: paths.home,
+    component: Home,
+    title: 'Home',
   },
   {
     url: paths.transactionHistory,
-    component: <TransactionHistory />,
+    component: TransactionHistory,
     title: 'Transaction History',
   },
   {
     url: paths.newTransaction,
-    component: <CreateTransaction />,
+    component: CreateTransaction,
     title: 'New Transaction',
   },
 ];
-
-export default routes;

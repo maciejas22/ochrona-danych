@@ -12,7 +12,6 @@ declare module 'fastify' {
     config: {
       NODE_ENV: NODE_ENV;
       JWT_SECRET: string;
-      ENCRYPT_SECRET: string;
       ADMIN_SECRET: string;
       HOST: string;
       PORT: number;
@@ -30,21 +29,13 @@ export default fastifyPlugin(
   ) => {
     const schema = {
       type: 'object',
-      required: [
-        'JWT_SECRET',
-        'ENCRYPT_SECRET',
-        'ADMIN_SECRET',
-        'DATABASE_URL',
-      ],
+      required: ['JWT_SECRET', 'ADMIN_SECRET', 'DATABASE_URL'],
       properties: {
         NODE_ENV: {
           type: 'string',
           default: 'dev',
         },
         JWT_SECRET: {
-          type: 'string',
-        },
-        ENCRYPT_SECRET: {
           type: 'string',
         },
         ADMIN_SECRET: {

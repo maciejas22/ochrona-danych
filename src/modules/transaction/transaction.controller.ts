@@ -72,7 +72,7 @@ export async function transactionHandler(
       receiverUsername: receiver.username,
     });
   } catch (err) {
-    return reply.code(500).send(err);
+    return reply.code(500).send('Internal server error');
   }
 }
 
@@ -109,6 +109,6 @@ export async function transactionHistoryHandler(
   try {
     return reply.code(200).send(transactionsHistory);
   } catch (err) {
-    return reply.code(500).send(err);
+    return reply.code(500).send('Internal server error');
   }
 }

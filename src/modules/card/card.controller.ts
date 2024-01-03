@@ -12,6 +12,6 @@ export async function getUserCardsHandler(
   try {
     return reply.code(200).send(cards);
   } catch (err) {
-    return reply.code(500).send(err);
+    return reply.code(500).send('Internal server error');
   }
 }

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useUser } from '../hooks/use-user';
-import paths from '../providers/router/routes';
+import paths from '../providers/router/routes.ts';
 
 export default function HomePage() {
   const { user, isLoading, getUser } = useUser();
