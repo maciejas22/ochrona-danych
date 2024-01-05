@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { buildJsonSchemas } from 'fastify-zod';
 
 const cardCore = z.object({
-  cardNumber: z.string().uuid(),
+  cardNumber: z.string().min(16).max(16),
   cvv: z.string().min(3).max(3),
   cardHolderName: z.string(),
   expirationDate: z.string(),
@@ -11,16 +11,12 @@ const cardCore = z.object({
 
 const cardCoreWithoutSensitive = cardCore.omit({ cvv: true });
 
-const createCardSchema = cardCore.extend({});
 const createCardResponseSchema = cardCoreWithoutSensitive.extend({});
 
-const getCardsResponseSchema = z.array(cardCoreWithoutSensitive);
-
-export type CreateCardInput = z.infer<typeof createCardSchema>;
+const getCardsResponseSchema = z.array(cardCore);
 
 export const { schemas: cardSchemas, $ref } = buildJsonSchemas(
   {
-    createCardSchema,
     createCardResponseSchema,
     getCardsResponseSchema,
   },

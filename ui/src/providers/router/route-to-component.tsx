@@ -1,7 +1,9 @@
 import Login from '../../pages/auth/login';
 import Register from '../../pages/auth/register';
+import CardNew from '../../pages/card/create';
+import CardList from '../../pages/card/list';
 import Home from '../../pages/home';
-import CreateTransaction from '../../pages/transaction/create';
+import TransactionNew from '../../pages/transaction/create';
 import TransactionHistory from '../../pages/transaction/history';
 import paths from './routes';
 
@@ -36,8 +38,18 @@ export const privateRoutes: Route[] = [
     title: 'Transaction History',
   },
   {
-    url: paths.newTransaction,
-    component: CreateTransaction,
-    title: 'New Transaction',
+    url: paths.transactionNew,
+    component: TransactionNew,
+    title: 'Transaction New',
+  },
+  {
+    url: paths.cardList,
+    component: CardList,
+    title: 'Cards List',
+  },
+  {
+    url: paths.cardNew,
+    component: CardNew,
+    title: 'Card New',
   },
 ];

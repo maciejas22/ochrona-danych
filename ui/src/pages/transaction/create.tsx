@@ -41,7 +41,7 @@ export default function CreateTransaction() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex h-screen items-center justify-center mx-4 my-2">
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-4 rounded-xl border border-black p-8"

@@ -18,15 +18,36 @@ export default function HomePage() {
   return (
     <>
       <div className="flex items-center justify-between mx-4 my-2">
-        <p>Account Balance: {user?.balance}$</p>
-
-        <Link to={paths.transactionHistory}>History</Link>
         <Link
-          to={paths.newTransaction}
+          to={paths.cardNew}
           className="rounded-md border border-black px-1 py-1"
         >
-          New Transaction
+          New Card
         </Link>
+        <Link
+          to={paths.cardList}
+          className="rounded-md border border-black px-1 py-1"
+        >
+          List Cards
+        </Link>
+      </div>
+      <div className="flex items-center justify-between mx-4 my-2">
+        <p>Account Balance: {user?.balance}$</p>
+
+        <div className="flex gap-2">
+          <Link
+            to={paths.transactionNew}
+            className="rounded-md border border-black px-1 py-1"
+          >
+            New Transaction
+          </Link>
+          <Link
+            to={paths.transactionHistory}
+            className="rounded-md border border-black px-1 py-1"
+          >
+            Transaction History
+          </Link>
+        </div>
       </div>
     </>
   );

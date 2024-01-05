@@ -19,15 +19,27 @@ export default function TransactionHistory() {
   }
 
   return (
-    <div>
-      <h1>Transaction history: </h1>
-      <ul>
-        {data?.map((transaction, id) => (
-          <li key={id}>
-            {transaction.title} - {transaction.amount}
-          </li>
-        ))}
-      </ul>
+    <div className="mx-4 my-2">
+      <table className="table-auto w-full text-left">
+        <thead>
+          <tr>
+            <th className="py-4">Title</th>
+            <th className="py-4">Amount</th>
+            <th className="py-4">Sender</th>
+            <th className="py-4">Receiver</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data?.map((transaction, id) => (
+            <tr key={id} className="border-b">
+              <td className="py-2">{transaction.title}</td>
+              <td className="py-2">{transaction.amount}$</td>
+              <td className="py-2">{transaction.senderUsername}</td>
+              <td className="py-2">{transaction.receiverUsername}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       {error && (
         <div className="font-bold text-red-600">
           {(error.response?.data as { message: string })?.message ??

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 
-import { getUserCardsHandler } from './card.controller';
+import { createCardHandler, getUserCardsHandler } from './card.controller';
 import { $ref } from './card.schema';
 
 const userRoutes = async (server: FastifyInstance) => {
@@ -16,6 +16,18 @@ const userRoutes = async (server: FastifyInstance) => {
       },
     },
     getUserCardsHandler,
+  );
+
+  server.post(
+    '/create',
+    {
+      schema: {
+        response: {
+          200: $ref('createCardResponseSchema'),
+        },
+      },
+    },
+    createCardHandler,
   );
 };
 
