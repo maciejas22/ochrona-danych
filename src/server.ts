@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
+import Fastify from 'fastify';
 
 import modules from './modules';
 import plugins from './plugins';

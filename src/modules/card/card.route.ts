@@ -6,10 +6,11 @@ import { $ref } from './card.schema';
 const userRoutes = async (server: FastifyInstance) => {
   server.addHook('onRequest', server.authenticate);
 
-  server.get(
+  server.post(
     '/',
     {
       schema: {
+        body: $ref('getCardsInput'),
         response: {
           200: $ref('getCardsResponseSchema'),
         },
@@ -22,6 +23,7 @@ const userRoutes = async (server: FastifyInstance) => {
     '/create',
     {
       schema: {
+        body: $ref('createCardSchema'),
         response: {
           200: $ref('createCardResponseSchema'),
         },

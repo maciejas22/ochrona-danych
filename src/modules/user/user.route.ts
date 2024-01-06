@@ -1,6 +1,7 @@
 import { type FastifyInstance } from 'fastify';
 
 import {
+  getPartialPasswordIndexesHandler,
   getTransactionsHistoryHandler,
   getUserHandler,
 } from './user.controller';
@@ -30,6 +31,18 @@ const userRoutes = async (server: FastifyInstance) => {
       },
     },
     getTransactionsHistoryHandler,
+  );
+
+  server.get(
+    '/partial-password-indexes',
+    {
+      schema: {
+        response: {
+          200: $ref('getPartialPasswordIndexesResponseSchema'),
+        },
+      },
+    },
+    getPartialPasswordIndexesHandler,
   );
 };
 

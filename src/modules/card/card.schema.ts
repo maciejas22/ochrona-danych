@@ -11,13 +11,26 @@ const cardCore = z.object({
 
 const cardCoreWithoutSensitive = cardCore.omit({ cvv: true });
 
+const paritalPassword = z.object({
+  partialPassword: z.string(),
+});
+
+const createCardSchema = paritalPassword.extend({});
+
 const createCardResponseSchema = cardCoreWithoutSensitive.extend({});
+
+const getCardsInput = paritalPassword.extend({});
 
 const getCardsResponseSchema = z.array(cardCore);
 
+export type CreateCardInput = z.infer<typeof createCardSchema>;
+export type GetCardsInput = z.infer<typeof getCardsInput>;
+
 export const { schemas: cardSchemas, $ref } = buildJsonSchemas(
   {
+    createCardSchema,
     createCardResponseSchema,
+    getCardsInput,
     getCardsResponseSchema,
   },
   { $id: 'card' },

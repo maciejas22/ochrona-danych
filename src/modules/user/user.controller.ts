@@ -1,6 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { findUserById, getTransactionsHistory } from './user.service';
+import {
+  findUserById,
+  getPartialPasswordIndexes,
+  getTransactionsHistory,
+} from './user.service';
 
 export async function getUserHandler(
   request: FastifyRequest,
@@ -34,6 +38,26 @@ export async function getTransactionsHistoryHandler(
   try {
     return reply.code(200).send(transactions);
   } catch (err) {
+    return reply.code(500).send('Internal server error');
+  }
+}
+
+export async function getPartialPasswordIndexesHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const tokenPayload = request.user;
+
+  try {
+    const user = await findUserById(tokenPayload.id);
+    if (!user) {
+      return reply.code(404).send('User not found');
+    }
+    return reply.code(200).send({
+      partialPasswordIndexes: await getPartialPasswordIndexes(tokenPayload.id),
+    });
+  } catch (err) {
+    console.error(err);
     return reply.code(500).send('Internal server error');
   }
 }

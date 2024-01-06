@@ -13,6 +13,7 @@ const transactionRoutes = async (server: FastifyInstance) => {
     '/new',
     {
       schema: {
+        body: $ref('createTransactionSchema'),
         response: {
           200: $ref('createTransactionResponseSchema'),
         },
@@ -21,10 +22,11 @@ const transactionRoutes = async (server: FastifyInstance) => {
     transactionHandler,
   );
 
-  server.get(
+  server.post(
     '/history',
     {
       schema: {
+        body: $ref('transactionHistorySchema'),
         response: {
           200: $ref('transactionHistoryResponseSchema'),
         },

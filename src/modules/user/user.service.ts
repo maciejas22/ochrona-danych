@@ -1,3 +1,5 @@
+import { extractPartialPasswordIndexes } from '../../utils/partial-password-indexes';
+
 import { prisma } from '../../plugins/prisma';
 
 export const findUserById = async (id: string) => {
@@ -34,4 +36,18 @@ export const getTransactionsHistory = async (userId: string) => {
       },
     },
   });
+};
+
+export const getPartialPasswordIndexes = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return extractPartialPasswordIndexes(user.partialPassword);
 };

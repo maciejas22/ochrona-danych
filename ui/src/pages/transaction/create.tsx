@@ -4,15 +4,18 @@ import { AxiosError } from 'axios';
 
 import axios from '../../utils/axios';
 
+import usePartialPasswordIndexes from '../../hooks/use-partial-password-indexes';
 import { ITransaction } from '../../types/transaction';
 
 interface ICreateTransactionBody {
   title: string;
   amount: number;
   receiverAccountNumber: string;
+  partialPassword: string;
 }
 
 export default function CreateTransaction() {
+  const { indexes } = usePartialPasswordIndexes();
   const { mutate, isLoading, error } = useMutation<
     ITransaction,
     AxiosError,
@@ -21,6 +24,9 @@ export default function CreateTransaction() {
     mutationKey: 'createTransaction',
     mutationFn: async (body) => {
       return axios.post('/transaction/new', body);
+    },
+    onSuccess: () => {
+      alert('Transaction created!');
     },
   });
 
@@ -32,13 +38,21 @@ export default function CreateTransaction() {
     const receiverAccountNumber = (
       elements.namedItem('receiverAccountNumber') as HTMLInputElement
     ).value;
+    const partialPassword = (
+      elements.namedItem('partialPassword') as HTMLInputElement
+    ).value;
 
     mutate({
       title,
       amount: Number(amount),
       receiverAccountNumber: receiverAccountNumber,
+      partialPassword,
     });
   };
+
+  if (!indexes) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex h-screen items-center justify-center mx-4 my-2">
@@ -65,8 +79,19 @@ export default function CreateTransaction() {
         <div className="flex justify-between gap-2">
           <p>receiver account number:</p>
           <input
-            type="number"
+            type="text"
             name="receiverAccountNumber"
+            className="rounded-md border border-black"
+          />
+        </div>
+        <div className="flex justify-between gap-2">
+          <p>
+            enter {indexes.partialPasswordIndexes.join(', ')} characters of your
+            password:
+          </p>
+          <input
+            type="text"
+            name="partialPassword"
             className="rounded-md border border-black"
           />
         </div>

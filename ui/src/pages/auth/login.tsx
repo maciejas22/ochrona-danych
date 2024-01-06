@@ -51,8 +51,7 @@ export default function LoginPage() {
         </button>
         {error && (
           <div className="font-bold text-red-600">
-            {(error.response?.data as { message: string })?.message ??
-              error.message}
+            {error.response?.data as string}
           </div>
         )}
       </form>

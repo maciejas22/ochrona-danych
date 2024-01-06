@@ -1,4 +1,4 @@
-import { Status, User } from '@prisma/client';
+import { Status } from '@prisma/client';
 
 import {
   decrypt,
@@ -7,11 +7,8 @@ import {
   generateKey,
   getKEK,
 } from '../../utils/encrypt';
-import {
-  generatePartialPassword,
-  generateSalt,
-  hashPassword,
-} from '../../utils/hash';
+import { generateSalt, hashPassword } from '../../utils/hash';
+import { generatePartialPassword } from '../../utils/partial-password-indexes';
 
 import { prisma } from '../../plugins/prisma';
 
@@ -64,7 +61,12 @@ export const findUserByUsername = async (username: string) => {
   });
 };
 
-export const incrementInvalidPasswordCount = async (user: User) => {
+export const incrementInvalidPasswordCount = async (userId: string) => {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
   return prisma.user.update({
     where: {
       id: user.id,
@@ -76,7 +78,12 @@ export const incrementInvalidPasswordCount = async (user: User) => {
   });
 };
 
-export const resetInvalidPasswordCount = async (user: User) => {
+export const resetInvalidPasswordCount = async (userId: string) => {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
   return prisma.user.update({
     where: {
       id: user.id,
@@ -88,7 +95,15 @@ export const resetInvalidPasswordCount = async (user: User) => {
   });
 };
 
-export const resetPartialPassword = (user: User, password: string) => {
+export const resetPartialPassword = async (
+  userId: string,
+  password: string,
+) => {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
   const { iv, KEKSalt } = user;
   const { partialPassword, hash } = generatePartialPassword(password);
   const KEK = getKEK(partialPassword, KEKSalt);
@@ -100,7 +115,7 @@ export const resetPartialPassword = (user: User, password: string) => {
       id: user.id,
     },
     data: {
-      partialPassword,
+      partialPassword: hash,
       DEK,
     },
   });
@@ -109,7 +124,5 @@ export const resetPartialPassword = (user: User, password: string) => {
 const generateAccountNumber = () => {
   const accountNumber = Math.floor(Math.random() * 9000000000) + 1000000000;
 
-  const accountNumberString = accountNumber.toString();
-
-  return accountNumberString;
+  return accountNumber.toString();
 };

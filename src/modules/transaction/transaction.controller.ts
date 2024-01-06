@@ -1,7 +1,12 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
+import { verifyPartialPassword } from '../../utils/partial-password-indexes';
+
 import { prisma } from '../../plugins/prisma';
-import { CreateTransactionInput } from './transaction.schema';
+import {
+  CreateTransactionInput,
+  TransactionHistoryInput,
+} from './transaction.schema';
 import {
   getTransactionHistory,
   sendTransaction,
@@ -24,11 +29,11 @@ export async function transactionHandler(
   });
 
   if (!sender) {
-    return reply.code(404).send({
-      statusCode: 404,
-      error: 'Not Found',
-      message: 'Sender not found',
-    });
+    return reply.code(404).send('Sender not found');
+  }
+
+  if (!verifyPartialPassword(body.partialPassword, sender.partialPassword)) {
+    return reply.code(400).send('Invalid partial password');
   }
 
   const receiver = await prisma.user.findUnique({
@@ -38,11 +43,7 @@ export async function transactionHandler(
   });
 
   if (!receiver) {
-    return reply.code(404).send({
-      statusCode: 404,
-      error: 'Not Found',
-      message: 'Receiver not found',
-    });
+    return reply.code(400).send('Receiver not found');
   }
 
   if (
@@ -51,10 +52,7 @@ export async function transactionHandler(
       amount: body.amount,
     }))
   ) {
-    return reply.code(400).send({
-      error: 'Bad Request',
-      message: 'Insufficient balance',
-    });
+    return reply.code(400).send('Insufficient balance');
   }
 
   const transaction = await sendTransaction({
@@ -77,7 +75,9 @@ export async function transactionHandler(
 }
 
 export async function transactionHistoryHandler(
-  request: FastifyRequest,
+  request: FastifyRequest<{
+    Body: TransactionHistoryInput;
+  }>,
   reply: FastifyReply,
 ) {
   const tokenPayload = request.user;
@@ -89,11 +89,13 @@ export async function transactionHistoryHandler(
   });
 
   if (!user) {
-    return reply.code(404).send({
-      statusCode: 404,
-      error: 'Not Found',
-      message: 'User not found',
-    });
+    return reply.code(404).send('User not found');
+  }
+
+  if (
+    !verifyPartialPassword(request.body.partialPassword, user.partialPassword)
+  ) {
+    return reply.code(400).send('Invalid partial password');
   }
 
   const transactionsHistory = (await getTransactionHistory(user.id)).map(

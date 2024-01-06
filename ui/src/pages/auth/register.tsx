@@ -134,14 +134,12 @@ export default function RegisterPage() {
         </button>
         {entropyError && (
           <div className="font-bold text-red-600">
-            {(entropyError.response?.data as { message: string })?.message ??
-              entropyError.message}
+            {entropyError.response?.data as string}
           </div>
         )}
         {registerError && (
           <div className="font-bold text-red-600">
-            {(registerError.response?.data as { message: string })?.message ??
-              registerError.message}
+            {registerError.response?.data as string}
           </div>
         )}
       </form>

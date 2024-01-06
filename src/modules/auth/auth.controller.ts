@@ -1,7 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { calcEntropy } from '../../utils/entropy';
-import { comparePassword, verifyPartialPassword } from '../../utils/hash';
+import { comparePassword } from '../../utils/hash';
+import { verifyPartialPassword } from '../../utils/partial-password-indexes';
 
 import { EntropyInput, LoginUserInput, RegisterUserInput } from './auth.schema';
 import {
@@ -21,13 +22,14 @@ export async function registerUserHandler(
   const body = request.body;
   let user = await findUserByUsername(request.body.username);
   if (user) {
-    return reply.code(400).send({ message: 'User already exists' });
+    return reply.code(400).send('User already exists');
   }
 
   try {
     user = await createUser(body);
     return reply.code(200).send(user);
   } catch (err) {
+    console.log(err);
     return reply.code(500).send('Internal server error');
   }
 }
@@ -45,7 +47,7 @@ export async function checkPartialPassword(
   try {
     const user = await findUserByUsername(request.body.username);
     if (!user) {
-      return reply.code(404).send({ message: 'User not found' });
+      return reply.code(404).send('User not found');
     }
     const isMatch = verifyPartialPassword(
       body.partialPassword,
@@ -68,17 +70,17 @@ export async function loginUserHandler(
   try {
     const user = await findUserByUsername(body.username);
     if (!user) {
-      return reply.code(404).send({ message: 'User not found' });
+      return reply.code(404).send('User not found');
     }
 
     const isPasswordMatch = comparePassword(body.password, user.password);
     if (!isPasswordMatch) {
-      incrementInvalidPasswordCount(user);
-      return reply.code(400).send({ message: 'Invalid password' });
+      incrementInvalidPasswordCount(user.id);
+      return reply.code(400).send('Invalid password');
     }
 
-    resetInvalidPasswordCount(user);
-    resetPartialPassword(user, body.password);
+    resetInvalidPasswordCount(user.id);
+    resetPartialPassword(user.id, body.password);
 
     const token = await reply.jwtSign({
       id: user.id,
@@ -109,7 +111,7 @@ export async function logoutUserHandler(
     domain: 'localhost',
     path: '/',
   });
-  return reply.code(200).send({ message: 'Logout successful' });
+  return reply.code(200).send('Logout successful');
 }
 
 export async function entropyHandler(

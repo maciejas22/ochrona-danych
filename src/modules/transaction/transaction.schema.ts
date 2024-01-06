@@ -12,14 +12,23 @@ const transactionCore = z.object({
   amount: z.number(),
 });
 
-const createTransactionSchema = transactionCore.extend({
-  receiverAccountNumber: z.string().uuid(),
+const partialPassword = z.object({
+  partialPassword: z.string(),
 });
+
+const createTransactionSchema = z
+  .object({
+    receiverAccountNumber: z.string(),
+  })
+  .merge(transactionCore)
+  .merge(partialPassword);
 
 const createTransactionResponseSchema = transactionCore.extend({
   senderUsername: z.string(),
   receiverUsername: z.string(),
 });
+
+const transactionHistorySchema = z.object({}).merge(partialPassword);
 
 const transactionHistoryResponseSchema = z.array(
   transactionCore.extend({
@@ -29,11 +38,13 @@ const transactionHistoryResponseSchema = z.array(
 );
 
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
+export type TransactionHistoryInput = z.infer<typeof transactionHistorySchema>;
 
 export const { schemas: transactionSchemas, $ref } = buildJsonSchemas(
   {
     createTransactionSchema,
     createTransactionResponseSchema,
+    transactionHistorySchema,
     transactionHistoryResponseSchema,
   },
   { $id: 'transaction' },

@@ -31,10 +31,15 @@ const getTransactionsHistoryResponseSchema = z.array(
   }),
 );
 
+const getPartialPasswordIndexesResponseSchema = z.object({
+  partialPasswordIndexes: z.array(z.number()),
+});
+
 export const { schemas: userSchemas, $ref } = buildJsonSchemas(
   {
     getUserResponseSchema,
     getTransactionsHistoryResponseSchema,
+    getPartialPasswordIndexesResponseSchema,
   },
   { $id: 'user' },
 );
