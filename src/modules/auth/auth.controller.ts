@@ -1,3 +1,5 @@
+import { Status } from '@prisma/client';
+
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { calcEntropy } from '../../utils/entropy';
@@ -73,6 +75,10 @@ export async function loginUserHandler(
       return reply.code(404).send('User not found');
     }
 
+    if (user.status === Status.BLOCKED) {
+      return reply.code(400).send('User is blocked');
+    }
+
     const isPasswordMatch = comparePassword(body.password, user.password);
     if (!isPasswordMatch) {
       incrementInvalidPasswordCount(user.id);
@@ -92,9 +98,9 @@ export async function loginUserHandler(
         domain: 'localhost',
         path: '/',
         sameSite: 'strict',
-        secure: false,
+        secure: false, // TODO: change to true in production
         httpOnly: true,
-        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
       })
       .code(200)
       .send(user);
