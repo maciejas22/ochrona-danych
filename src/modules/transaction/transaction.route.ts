@@ -26,7 +26,6 @@ const transactionRoutes = async (server: FastifyInstance) => {
     '/history',
     {
       schema: {
-        body: $ref('transactionHistorySchema'),
         response: {
           200: $ref('transactionHistoryResponseSchema'),
         },

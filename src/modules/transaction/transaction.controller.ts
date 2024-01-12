@@ -3,10 +3,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { verifyPartialPassword } from '../../utils/partial-password-indexes';
 
 import { prisma } from '../../plugins/prisma';
-import {
-  CreateTransactionInput,
-  TransactionHistoryInput,
-} from './transaction.schema';
+import { CreateTransactionInput } from './transaction.schema';
 import {
   getTransactionHistory,
   sendTransaction,
@@ -75,9 +72,7 @@ export async function transactionHandler(
 }
 
 export async function transactionHistoryHandler(
-  request: FastifyRequest<{
-    Body: TransactionHistoryInput;
-  }>,
+  request: FastifyRequest,
   reply: FastifyReply,
 ) {
   const tokenPayload = request.user;
@@ -90,12 +85,6 @@ export async function transactionHistoryHandler(
 
   if (!user) {
     return reply.code(404).send('User not found');
-  }
-
-  if (
-    !verifyPartialPassword(request.body.partialPassword, user.partialPassword)
-  ) {
-    return reply.code(400).send('Invalid partial password');
   }
 
   const transactionsHistory = (await getTransactionHistory(user.id)).map(

@@ -28,8 +28,6 @@ const createTransactionResponseSchema = transactionCore.extend({
   receiverUsername: z.string(),
 });
 
-const transactionHistorySchema = z.object({}).merge(partialPassword);
-
 const transactionHistoryResponseSchema = z.array(
   transactionCore.extend({
     senderUsername: z.string(),
@@ -38,13 +36,11 @@ const transactionHistoryResponseSchema = z.array(
 );
 
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
-export type TransactionHistoryInput = z.infer<typeof transactionHistorySchema>;
 
 export const { schemas: transactionSchemas, $ref } = buildJsonSchemas(
   {
     createTransactionSchema,
     createTransactionResponseSchema,
-    transactionHistorySchema,
     transactionHistoryResponseSchema,
   },
   { $id: 'transaction' },
