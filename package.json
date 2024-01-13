@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npx prisma migrate dev && nodemon ./src/app.ts"
+    "dev": "npx prisma migrate dev && nodemon ./src/app.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "build": "tsc",
+    "start": "node ./dist/app.js",
+    "postinstall": "npm run prisma:generate"
   },
   "author": "",
   "license": "ISC",

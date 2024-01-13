@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  ochorna-db:
+  ochrona-db:
     image: postgres
-    container_name: db
+    container_name: ${DB_CONTAINER_NAME}
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -11,12 +11,36 @@ services:
     ports:
       - '5432:5432'
     networks:
-      - ochrona-network
+      - ochrona-backend-network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready']
       interval: 10s
       timeout: 5s
       retries: 5
 
+  ochrona-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${BACKEND_CONTAINER_NAME}
+    ports:
+      - '3000:3000'
+    networks:
+      - ochrona-backend-network
+    depends_on:
+      ochrona-db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/healthcheck']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  ochrona-frontend:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+      - '5173:80'
 networks:
-  ochrona-network:
+  ochrona-backend-network:
