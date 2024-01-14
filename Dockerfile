@@ -23,13 +23,14 @@ WORKDIR /app
 
 COPY --from=BUILDER /app/dist /app/dist
 
-COPY package.json package-lock.json .env /app/
-COPY src /app/src
+COPY package.json package-lock.json .env docker-entrypoint.sh /app/
 COPY prisma /app/prisma
 
 RUN npm i --omit=dev
 
 RUN npm run prisma:generate
-RUN npm run prisma:migrate:deploy
+
+RUN chmod +x /app/docker-entrypoint.sh
+ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
 
 CMD ["npm", "run", "start"]

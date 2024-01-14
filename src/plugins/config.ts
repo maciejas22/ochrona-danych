@@ -55,7 +55,8 @@ export default fastifyPlugin(
         ALLOWED_ORIGINS: {
           type: 'string',
           separator: ',',
-          default: 'http://localhost:5173,https://localhost:5173',
+          default:
+            'http://localhost:5173,https://localhost,https:localhost:443',
         },
       },
     };

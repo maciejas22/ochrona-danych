@@ -1,6 +1,28 @@
 version: '3.8'
 
 services:
+  ochrona-keygen:
+    image: alpine
+    volumes:
+      - ./crt:/crt
+    entrypoint: bin/sh
+    command: -c "apk add openssl && openssl req -nodes -new -x509 -keyout /crt/key.pem -out /crt/cert.pem -subj '/CN=localhost'"
+
+  ochrona-nginx:
+    image: nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./crt:/etc/nginx/crt
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - keygen
+      - ochrona-backend
+      - ochrona-frontend
+    networks:
+      - ochrona-network
+
   ochrona-db:
     image: postgres
     container_name: ${DB_CONTAINER_NAME}
@@ -11,12 +33,12 @@ services:
     ports:
       - '5432:5432'
     networks:
-      - ochrona-backend-network
+      - ochrona-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready']
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 5s
+      timeout: 3s
+      retries: 30
 
   ochrona-backend:
     build:
@@ -26,10 +48,9 @@ services:
     ports:
       - '3000:3000'
     networks:
-      - ochrona-backend-network
+      - ochrona-network
     depends_on:
-      ochrona-db:
-        condition: service_healthy
+      - ochrona-db
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/healthcheck']
       interval: 30s
@@ -42,5 +63,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - '5173:80'
+    networks:
+      - ochrona-network
+
 networks:
-  ochrona-backend-network:
+  ochrona-network:
