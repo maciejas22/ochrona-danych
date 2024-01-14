@@ -28,8 +28,6 @@ COPY prisma /app/prisma
 
 RUN npm i --omit=dev
 
-RUN npm run prisma:generate
-
 RUN chmod +x /app/docker-entrypoint.sh
 ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
 
