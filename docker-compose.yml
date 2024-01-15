@@ -25,7 +25,7 @@ services:
 
   ochrona-db:
     image: postgres
-    container_name: ${DB_CONTAINER_NAME}
+    container_name: ochrona-db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -44,7 +44,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ${BACKEND_CONTAINER_NAME}
+    container_name: ochrona-backend
     ports:
       - '3000:3000'
     networks:
