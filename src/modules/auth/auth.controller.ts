@@ -72,7 +72,7 @@ export async function loginUserHandler(
   try {
     const user = await findUserByUsername(body.username);
     if (!user) {
-      return reply.code(404).send('User not found');
+      return reply.code(400).send('Invalid password or username');
     }
 
     if (user.status === Status.BLOCKED) {
@@ -82,7 +82,7 @@ export async function loginUserHandler(
     const isPasswordMatch = comparePassword(body.password, user.password);
     if (!isPasswordMatch) {
       incrementInvalidPasswordCount(user.id);
-      return reply.code(400).send('Invalid password');
+      return reply.code(400).send('Invalid password or username');
     }
 
     resetInvalidPasswordCount(user.id);
@@ -98,7 +98,7 @@ export async function loginUserHandler(
         domain: 'localhost',
         path: '/',
         sameSite: 'strict',
-        secure: false, // TODO: change to true in production
+        secure: true,
         httpOnly: true,
         expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
       })

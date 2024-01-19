@@ -38,11 +38,11 @@ export default fastifyPlugin(
         try {
           await request.jwtVerify();
         } catch (err) {
-          request.log.error(err);
+          reply.clearCookie('accessToken');
           return reply.code(401).send({ message: 'Unauthorized' });
         }
       },
     );
   },
-  { name: 'jwt', dependencies: ['config'] },
+  { name: 'jwt', dependencies: ['config', 'cookie'] },
 );

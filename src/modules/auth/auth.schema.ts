@@ -8,13 +8,13 @@ const userCore = z.object({
       required_error: 'Username is required',
       invalid_type_error: 'Username must be a string',
     })
-    .min(2, 'Username must be at least 8 character long'),
+    .min(8, 'Username must be at least 8 character long'),
   password: z
     .string({
       required_error: 'Password is required',
       invalid_type_error: 'Password must be a string',
     })
-    .min(2, 'Password must be at least 8 character long'),
+    .min(8, 'Password must be at least 8 character long'),
 });
 
 const userCoreWithoutSensitive = userCore.omit({ password: true });

@@ -17,7 +17,7 @@ services:
       - ./crt:/etc/nginx/crt
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - keygen
+      - ochrona-keygen
       - ochrona-backend
       - ochrona-frontend
     networks:
