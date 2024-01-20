@@ -8,12 +8,12 @@ import axios from '../../utils/axios';
 import { IUser } from '../../types/user';
 
 interface ILoginBody {
-  username: string;
+  email: string;
   password: string;
 }
 
 interface IRegisterBody {
-  username: string;
+  email: string;
   name: string;
   surname: string;
   password: string;
@@ -21,7 +21,7 @@ interface IRegisterBody {
 
 interface AuthResponse {
   id: string;
-  username: string;
+  email: string;
 }
 
 interface IActionHandlers {

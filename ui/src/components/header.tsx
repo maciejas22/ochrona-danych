@@ -29,7 +29,7 @@ export default function Header() {
         )}
         {user && (
           <>
-            <p>{user.username}</p>
+            <p>{user.email}</p>
             <button
               className="rounded-md border border-black px-2 py-1"
               onClick={() =>

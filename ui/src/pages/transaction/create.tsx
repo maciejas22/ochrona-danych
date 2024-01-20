@@ -104,7 +104,9 @@ export default function CreateTransaction() {
         </button>
         {error && (
           <div className="font-bold text-red-600">
-            {error.response?.data as string}
+            {typeof error?.response?.data === 'string'
+              ? error.response.data
+              : 'An error occurred'}
           </div>
         )}
       </form>

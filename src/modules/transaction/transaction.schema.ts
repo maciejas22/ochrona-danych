@@ -24,23 +24,27 @@ const createTransactionSchema = z
   .merge(partialPassword);
 
 const createTransactionResponseSchema = transactionCore.extend({
-  senderUsername: z.string(),
-  receiverUsername: z.string(),
+  senderEmail: z.string().email(),
+  receiverEmail: z.string().email(),
 });
+
+const transactionHistorySchema = partialPassword.extend({});
 
 const transactionHistoryResponseSchema = z.array(
   transactionCore.extend({
-    senderUsername: z.string(),
-    receiverUsername: z.string(),
+    senderEmail: z.string(),
+    receiverEmail: z.string(),
   }),
 );
 
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
+export type TransactionHistoryInput = z.infer<typeof transactionHistorySchema>;
 
 export const { schemas: transactionSchemas, $ref } = buildJsonSchemas(
   {
     createTransactionSchema,
     createTransactionResponseSchema,
+    transactionHistorySchema,
     transactionHistoryResponseSchema,
   },
   { $id: 'transaction' },

@@ -4,7 +4,6 @@ import { buildJsonSchemas } from 'fastify-zod';
 
 const user = z.object({
   id: z.string().uuid(),
-  username: z.string().min(2, 'Username must be at least 2 character long'),
   name: z.string().min(2, 'Name must be at least 2 character long').optional(),
   surname: z
     .string()
@@ -14,8 +13,7 @@ const user = z.object({
     .string({
       invalid_type_error: 'Email must be a string',
     })
-    .email('Email must be a valid email')
-    .optional(),
+    .email('Email must be a valid email'),
   balance: z.number(),
 });
 

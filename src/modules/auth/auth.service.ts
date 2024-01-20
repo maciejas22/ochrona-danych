@@ -13,7 +13,7 @@ import { generatePartialPassword } from '../../utils/partial-password-indexes';
 import { prisma } from '../../plugins/prisma';
 
 export const createUser = async (input: {
-  username: string;
+  email: string;
   password: string;
   name: string;
   surname: string;
@@ -32,7 +32,7 @@ export const createUser = async (input: {
   return prisma.user.create({
     data: {
       accountNumber: generateAccountNumber(),
-      username: input.username,
+      email: input.email,
       name: input.name,
       surname: input.surname,
       password: passwordHash.salt + passwordHash.hash,
@@ -41,6 +41,7 @@ export const createUser = async (input: {
       KEKSalt,
       DEK,
       DEKReset,
+      lastLoginTimeStamp: Date.now(),
     },
   });
 };
@@ -53,10 +54,10 @@ export const findUserById = async (id: string) => {
   });
 };
 
-export const findUserByUsername = async (username: string) => {
+export const findUserByEmail = async (email: string) => {
   return prisma.user.findUnique({
     where: {
-      username: username,
+      email: email,
     },
   });
 };
@@ -117,6 +118,74 @@ export const resetPartialPassword = async (
     data: {
       partialPassword: hash,
       DEK,
+    },
+  });
+};
+
+export const resetPassword = async (userId: string, password: string) => {
+  const user = await findUserById(userId);
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const passwordHash = hashPassword(password);
+  const { partialPassword, hash: partialPasswordHash } =
+    generatePartialPassword(password);
+
+  const { iv, KEKSalt, DEKReset } = user;
+
+  const KEK = getKEK(partialPassword, KEKSalt);
+  const DEKRaw = decrypt(DEKReset, iv, process.env.ADMIN_SECRET!);
+
+  const DEK = encrypt(DEKRaw, iv, KEK);
+
+  return prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      password: passwordHash.salt + passwordHash.hash,
+      partialPassword: partialPasswordHash,
+      DEK,
+    },
+  });
+};
+
+export const updateResetPasswordToken = async (
+  userId: string,
+  token: string,
+) => {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      resetPasswordToken: token,
+    },
+  });
+};
+
+export const removeResetPasswordToken = (userId: string) => {
+  return prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      resetPasswordToken: null,
+    },
+  });
+};
+
+export const findUserByResetPasswordToken = async (token: string) => {
+  return prisma.user.findUnique({
+    where: {
+      resetPasswordToken: token,
     },
   });
 };

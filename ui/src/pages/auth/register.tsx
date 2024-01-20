@@ -53,14 +53,14 @@ export default function RegisterPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const { elements } = event.currentTarget;
-    const username = (elements.namedItem('username') as HTMLInputElement).value;
+    const email = (elements.namedItem('email') as HTMLInputElement).value;
     const name = (elements.namedItem('name') as HTMLInputElement).value;
     const surname = (elements.namedItem('surname') as HTMLInputElement).value;
     const password = (elements.namedItem('password') as HTMLInputElement).value;
 
     register(
       {
-        username,
+        email,
         name,
         surname,
         password,
@@ -78,10 +78,10 @@ export default function RegisterPage() {
         className="flex flex-col gap-4 rounded-xl border border-black p-8"
       >
         <div className="flex justify-between gap-2">
-          <p>username:</p>
+          <p>email:</p>
           <input
             type="text"
-            name="username"
+            name="email"
             className="rounded-md border border-black"
           />
         </div>
@@ -134,12 +134,16 @@ export default function RegisterPage() {
         </button>
         {entropyError && (
           <div className="font-bold text-red-600">
-            {entropyError.response?.data as string}
+            {typeof entropyError?.response?.data === 'string'
+              ? entropyError.response.data
+              : 'An error occurred'}
           </div>
         )}
         {registerError && (
           <div className="font-bold text-red-600">
-            {registerError.response?.data as string}
+            {typeof registerError?.response?.data === 'string'
+              ? registerError.response.data
+              : 'An error occurred'}
           </div>
         )}
       </form>

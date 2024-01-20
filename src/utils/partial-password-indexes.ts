@@ -41,5 +41,5 @@ function generatePartialPasswordIndexes(password: string): number[] {
     indexes.add(Math.floor(Math.random() * password.length));
   }
 
-  return Array.from(indexes).sort();
+  return Array.from(indexes).sort((a, b) => a - b);
 }

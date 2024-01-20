@@ -19,7 +19,7 @@ model User {
   id                   String     @id @default(uuid())
   name                 String
   surname              String
-  username             String     @unique
+  email                String     @unique 
   password             String
   balance              Float      @default(0)
   partialPassword      String
@@ -33,6 +33,8 @@ model User {
   accountNumber        String     @unique
   sentTransactions     Transaction[] @relation("SenderTransaction")
   receivedTransactions Transaction[] @relation("ReceiverTransaction")
+  lastLoginTimeStamp   BigInt       
+  resetPasswordToken   String?    @unique
 }
 
 model Card {

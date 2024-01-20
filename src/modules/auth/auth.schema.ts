@@ -3,12 +3,12 @@ import { z } from 'zod';
 import { buildJsonSchemas } from 'fastify-zod';
 
 const userCore = z.object({
-  username: z
+  email: z
     .string({
-      required_error: 'Username is required',
-      invalid_type_error: 'Username must be a string',
+      required_error: 'Email is required',
+      invalid_type_error: 'Email must be a string',
     })
-    .min(8, 'Username must be at least 8 character long'),
+    .email('Email must be a valid email'),
   password: z
     .string({
       required_error: 'Password is required',
@@ -41,9 +41,27 @@ const entropyResponseSchema = z.object({
   entropy: z.number(),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+const forgotPasswordResponseSchema = z.object({
+  token: z.string(),
+});
+
+const resetPasswordSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8, 'Password must be at least 8 character long'),
+  token: z.string(),
+});
+
+const resetPasswordResponseSchema = userWithoutSensitive.extend({});
+
 export type RegisterUserInput = z.infer<typeof registerUserSchema>;
 export type LoginUserInput = z.infer<typeof loginUserSchema>;
 export type EntropyInput = z.infer<typeof entropySchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 export const { schemas: authSchemas, $ref } = buildJsonSchemas(
   {
@@ -53,6 +71,10 @@ export const { schemas: authSchemas, $ref } = buildJsonSchemas(
     loginUserResponseSchema,
     entropySchema,
     entropyResponseSchema,
+    resetPasswordSchema,
+    resetPasswordResponseSchema,
+    forgotPasswordSchema,
+    forgotPasswordResponseSchema,
   },
   { $id: 'auth' },
 );

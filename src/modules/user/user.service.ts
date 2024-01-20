@@ -10,10 +10,10 @@ export const findUserById = async (id: string) => {
   });
 };
 
-export const findUserByUsername = async (username: string) => {
+export const findUserByEmail = async (email: string) => {
   return prisma.user.findUnique({
     where: {
-      username: username,
+      email: email,
     },
   });
 };

@@ -10,10 +10,10 @@ export default function LoginPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const { elements } = event.currentTarget;
-    const username = (elements.namedItem('username') as HTMLInputElement).value;
+    const email = (elements.namedItem('email') as HTMLInputElement).value;
     const password = (elements.namedItem('password') as HTMLInputElement).value;
 
-    login({ username, password }, { onSuccess: () => navigate(paths.home) });
+    login({ email, password }, { onSuccess: () => navigate(paths.home) });
   };
 
   if (isLoading) {
@@ -27,10 +27,10 @@ export default function LoginPage() {
         className="flex flex-col gap-4 rounded-xl border border-black p-8"
       >
         <div className="flex justify-between gap-2">
-          <p>username:</p>
+          <p>email:</p>
           <input
             type="text"
-            name="username"
+            name="email"
             className="rounded-md border border-black"
           />
         </div>
@@ -51,7 +51,9 @@ export default function LoginPage() {
         </button>
         {error && (
           <div className="font-bold text-red-600">
-            {error.response?.data as string}
+            {typeof error?.response?.data === 'string'
+              ? error.response.data
+              : 'An error occurred'}
           </div>
         )}
       </form>
