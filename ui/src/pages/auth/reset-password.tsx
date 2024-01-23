@@ -1,24 +1,41 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from 'react-query';
 
-import { useUser } from '../../hooks/use-user';
-import paths from '../../providers/router/routes';
+import { AxiosError } from 'axios';
 
-export default function LoginPage() {
-  const navigate = useNavigate();
-  const { login, isLoading, error } = useUser();
+import axios from '../../utils/axios';
+
+import { IUser } from '../../types/user';
+
+interface IResetPasswordPayload {
+  email: string;
+  password: string;
+  token: string;
+}
+
+export default function ResetPassword() {
+  const { mutate, error, isLoading } = useMutation<
+    IUser,
+    AxiosError,
+    IResetPasswordPayload
+  >({
+    mutationKey: 'resetPassword',
+    mutationFn: async (body) => {
+      return axios.post('/auth/reset-password', body);
+    },
+  });
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const { elements } = event.currentTarget;
     const email = (elements.namedItem('email') as HTMLInputElement).value;
     const password = (elements.namedItem('password') as HTMLInputElement).value;
+    const token = (elements.namedItem('token') as HTMLInputElement).value;
 
-    login({ email, password }, { onSuccess: () => navigate(paths.home) });
+    mutate(
+      { email, password, token },
+      { onSuccess: () => alert('Password reset successfully') },
+    );
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -35,10 +52,18 @@ export default function LoginPage() {
           />
         </div>
         <div className="flex justify-between gap-2">
-          <p>password:</p>
+          <p>new password:</p>
           <input
             type="password"
             name="password"
+            className="rounded-md border border-black"
+          />
+        </div>
+        <div className="flex justify-between gap-2">
+          <p>token:</p>
+          <input
+            type="text"
+            name="token"
             className="rounded-md border border-black"
           />
         </div>
@@ -47,7 +72,7 @@ export default function LoginPage() {
           disabled={isLoading}
           className="rounded-md border border-black"
         >
-          {isLoading ? 'Logging in...' : 'Login'}
+          {isLoading ? 'Sending' : 'reset password'}
         </button>
         {error && (
           <div className="font-bold text-red-600">
@@ -56,7 +81,6 @@ export default function LoginPage() {
               : 'An error occurred'}
           </div>
         )}
-        <Link to={paths.forgotPassword}>forgot password?</Link>
       </form>
     </div>
   );

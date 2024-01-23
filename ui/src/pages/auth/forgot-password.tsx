@@ -1,24 +1,31 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from 'react-query';
+import { Link } from 'react-router-dom';
 
-import { useUser } from '../../hooks/use-user';
+import { AxiosError } from 'axios';
+
+import axios from '../../utils/axios';
+
 import paths from '../../providers/router/routes';
 
-export default function LoginPage() {
-  const navigate = useNavigate();
-  const { login, isLoading, error } = useUser();
+export default function ForgotPassword() {
+  const { mutate, data, error, isLoading } = useMutation<
+    { token: string },
+    AxiosError,
+    { email: string }
+  >({
+    mutationKey: 'forgotPassword',
+    mutationFn: async (body) => {
+      return axios.post('/auth/forgot-password', body);
+    },
+  });
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const { elements } = event.currentTarget;
     const email = (elements.namedItem('email') as HTMLInputElement).value;
-    const password = (elements.namedItem('password') as HTMLInputElement).value;
 
-    login({ email, password }, { onSuccess: () => navigate(paths.home) });
+    mutate({ email });
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -34,20 +41,12 @@ export default function LoginPage() {
             className="rounded-md border border-black"
           />
         </div>
-        <div className="flex justify-between gap-2">
-          <p>password:</p>
-          <input
-            type="password"
-            name="password"
-            className="rounded-md border border-black"
-          />
-        </div>
         <button
           type="submit"
           disabled={isLoading}
           className="rounded-md border border-black"
         >
-          {isLoading ? 'Logging in...' : 'Login'}
+          {isLoading ? 'Sending...' : 'Send Reset Token'}
         </button>
         {error && (
           <div className="font-bold text-red-600">
@@ -56,7 +55,14 @@ export default function LoginPage() {
               : 'An error occurred'}
           </div>
         )}
-        <Link to={paths.forgotPassword}>forgot password?</Link>
+        {data && (
+          <>
+            <p>Reset token: {data.token}</p>
+            <Link to={paths.resetPassword} className="text-center">
+              reset password
+            </Link>
+          </>
+        )}
       </form>
     </div>
   );

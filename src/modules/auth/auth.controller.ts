@@ -2,9 +2,8 @@ import { Status } from '@prisma/client';
 
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { decrypt, encrypt } from '../../utils/encrypt';
 import { calcEntropy } from '../../utils/entropy';
-import { comparePassword } from '../../utils/hash';
+import { comparePassword, hashPassword } from '../../utils/hash';
 import { verifyPartialPassword } from '../../utils/partial-password-indexes';
 
 import {
@@ -15,12 +14,14 @@ import {
 } from './auth.schema';
 import {
   createUser,
+  findResetPasswordTokenByUserId,
   findUserByEmail,
   incrementInvalidPasswordCount,
   removeResetPasswordToken,
   resetInvalidPasswordCount,
   resetPartialPassword,
   resetPassword,
+  updateLastLoginTimeStamp,
   updateResetPasswordToken,
 } from './auth.service';
 
@@ -97,6 +98,7 @@ export async function loginUserHandler(
     resetInvalidPasswordCount(user.id);
     resetPartialPassword(user.id, body.password);
     removeResetPasswordToken(user.id);
+    updateLastLoginTimeStamp(user.id);
 
     const token = await reply.jwtSign({
       id: user.id,
@@ -162,16 +164,20 @@ export async function forgotPasswordHandler(
       return reply.code(404).send('User not found');
     }
 
-    const token = generateResetPasswordToken(
+    const tokenRaw = generateResetPasswordToken(
       user.id,
       user.password,
-      user.iv,
       user.lastLoginTimeStamp,
     );
+    const token = hashPassword(tokenRaw);
 
-    await updateResetPasswordToken(user.id, token);
+    await updateResetPasswordToken(user.id, `${token.salt}${token.hash}`);
+    await resetInvalidPasswordCount(user.id);
 
-    return reply.code(200).send({ token });
+    console.log('wygenerowany i zwrocony: ', tokenRaw);
+    console.log(`zapisany: ${token.salt}${token.hash}`);
+
+    return reply.code(200).send({ token: tokenRaw });
   } catch (err) {
     return reply.code(500).send('Internal server error');
   }
@@ -191,36 +197,21 @@ export async function resetPasswordHandler(
       return reply.code(404).send('Invalid email');
     }
 
-    if (!user.resetPasswordToken) {
+    const resetPasswordToken = await findResetPasswordTokenByUserId(user.id);
+    if (!resetPasswordToken) {
       return reply.code(400).send('Invalid token');
     }
 
-    const decoded = decodeResetPasswordToken(body.token, user.iv);
-    console.log(decoded);
-
-    // check if decoded correctly
-    if (decoded.userId !== user.id) {
+    const isTokenValid = comparePassword(body.token, resetPasswordToken.token);
+    if (
+      !isTokenValid ||
+      resetPasswordToken.createdAt < user.lastLoginTimeStamp
+    ) {
       return reply.code(400).send('Invalid token');
-    }
-    // check if user didn't change password
-    if (decoded.passwordHash !== user.password) {
-      return reply.code(401).send('Invalid token');
-    }
-
-    const currentTimeStamp = BigInt(Date.now());
-    const tokenTimeStamp = BigInt(decoded.currentTimeStamp);
-    const lastLoginTimeStamp = BigInt(decoded.lastLoginTimeStamp);
-
-    // check if token was created more than 30 minutes ago
-    if (currentTimeStamp - tokenTimeStamp > 30 * 60 * 1000) {
-      return reply.code(402).send('Invalid token');
-    }
-    // check if user logged in after token was created
-    if (lastLoginTimeStamp !== user.lastLoginTimeStamp) {
-      return reply.code(403).send('Invalid token');
     }
 
     const res = await resetPassword(user.id, body.password);
+    await removeResetPasswordToken(user.id);
     await resetInvalidPasswordCount(user.id);
 
     return reply.code(200).send(res);
@@ -232,25 +223,9 @@ export async function resetPasswordHandler(
 function generateResetPasswordToken(
   userId: string,
   passwordHash: string,
-  iv: string,
-  lastLoginTimeStamp: BigInt,
+  lastLoginTimeStamp: Date,
 ) {
-  const currentTimeStamp = Date.now();
-  const tokenRaw = `${userId}.${passwordHash}.${currentTimeStamp}.${lastLoginTimeStamp}`;
-  const token = encrypt(tokenRaw, iv, process.env.RESET_SECRET!);
-
-  return token;
-}
-
-function decodeResetPasswordToken(token: string, iv: string) {
-  const decoded = decrypt(token, iv, process.env.RESET_SECRET!);
-  const [userId, passwordHash, currentTimeStamp, lastLoginTimeStamp] =
-    decoded.split('.');
-
-  return {
-    userId,
-    passwordHash,
-    currentTimeStamp,
-    lastLoginTimeStamp,
-  };
+  const tokenRaw = `${userId}.${passwordHash}.${lastLoginTimeStamp}`;
+  const token = hashPassword(tokenRaw);
+  return `${token.salt}${token.hash}`;
 }

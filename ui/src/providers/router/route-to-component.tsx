@@ -1,5 +1,7 @@
+import ForgotPassword from '../../pages/auth/forgot-password';
 import Login from '../../pages/auth/login';
 import Register from '../../pages/auth/register';
+import ResetPassword from '../../pages/auth/reset-password';
 import CardNew from '../../pages/card/create';
 import CardList from '../../pages/card/list';
 import Home from '../../pages/home';
@@ -23,6 +25,16 @@ export const publicRoutes: Route[] = [
     url: paths.register,
     component: Register,
     title: 'Register',
+  },
+  {
+    url: paths.forgotPassword,
+    component: ForgotPassword,
+    title: 'Forgot Password',
+  },
+  {
+    url: paths.resetPassword,
+    component: ResetPassword,
+    title: 'Reset Password',
   },
 ];
 

@@ -15,6 +15,12 @@ const userCore = z.object({
       invalid_type_error: 'Password must be a string',
     })
     .min(8, 'Password must be at least 8 character long'),
+  name: z.string().min(2, 'Name must be at least 2 character long').optional(),
+  surname: z
+    .string()
+    .min(2, 'Surname must be at least 2 character long')
+    .optional(),
+  balance: z.number().optional(),
 });
 
 const userCoreWithoutSensitive = userCore.omit({ password: true });

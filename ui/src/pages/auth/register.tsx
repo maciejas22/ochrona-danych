@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { MutationFunction, useMutation } from 'react-query';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { AxiosError } from 'axios';
 
@@ -146,6 +146,7 @@ export default function RegisterPage() {
               : 'An error occurred'}
           </div>
         )}
+        <Link to={paths.forgotPassword}>forgot password?</Link>
       </form>
     </div>
   );

@@ -41,7 +41,7 @@ export const createUser = async (input: {
       KEKSalt,
       DEK,
       DEKReset,
-      lastLoginTimeStamp: Date.now(),
+      lastLoginTimeStamp: new Date(),
     },
   });
 };
@@ -58,6 +58,22 @@ export const findUserByEmail = async (email: string) => {
   return prisma.user.findUnique({
     where: {
       email: email,
+    },
+  });
+};
+
+export const updateLastLoginTimeStamp = async (userId: string) => {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      lastLoginTimeStamp: new Date(),
     },
   });
 };
@@ -161,31 +177,32 @@ export const updateResetPasswordToken = async (
     throw new Error('User not found');
   }
 
-  return prisma.user.update({
+  return prisma.resetPasswordToken.upsert({
     where: {
-      id: user.id,
+      userId: user.id,
     },
-    data: {
-      resetPasswordToken: token,
+    update: {
+      token: token,
+    },
+    create: {
+      userId: user.id,
+      token: token,
+    },
+  });
+};
+
+export const findResetPasswordTokenByUserId = async (userId: string) => {
+  return prisma.resetPasswordToken.findUnique({
+    where: {
+      userId: userId,
     },
   });
 };
 
 export const removeResetPasswordToken = (userId: string) => {
-  return prisma.user.update({
+  return prisma.resetPasswordToken.delete({
     where: {
-      id: userId,
-    },
-    data: {
-      resetPasswordToken: null,
-    },
-  });
-};
-
-export const findUserByResetPasswordToken = async (token: string) => {
-  return prisma.user.findUnique({
-    where: {
-      resetPasswordToken: token,
+      userId: userId,
     },
   });
 };
