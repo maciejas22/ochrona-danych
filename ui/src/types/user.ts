@@ -4,4 +4,5 @@ export interface IUser {
   surname?: string;
   email: string;
   balance: number;
+  accountNumber: string;
 }

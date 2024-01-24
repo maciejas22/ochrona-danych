@@ -17,6 +17,9 @@ export default function HomePage() {
 
   return (
     <>
+      <p className="text-xl text-center">
+        Account Number: {user?.accountNumber}
+      </p>
       <div className="flex items-center justify-between mx-4 my-2">
         <Link
           to={paths.cardNew}

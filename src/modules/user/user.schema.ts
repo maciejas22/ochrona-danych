@@ -15,6 +15,7 @@ const user = z.object({
     })
     .email('Email must be a valid email'),
   balance: z.number(),
+  accountNumber: z.string(),
 });
 
 const getUserResponseSchema = user.extend({});

@@ -3,6 +3,30 @@ import { z } from 'zod';
 import { buildJsonSchemas } from 'fastify-zod';
 
 const userCore = z.object({
+  email: z.string({
+    required_error: 'Email is required',
+    invalid_type_error: 'Email must be a string',
+  }),
+  password: z.string({
+    required_error: 'Password is required',
+    invalid_type_error: 'Password must be a string',
+  }),
+  name: z.string().min(2, 'Name must be at least 2 character long').optional(),
+  surname: z
+    .string()
+    .min(2, 'Surname must be at least 2 character long')
+    .optional(),
+  balance: z.number(),
+  accountNumber: z.string(),
+});
+
+const userCoreWithoutSensitive = userCore.omit({ password: true });
+
+const userWithoutSensitive = userCoreWithoutSensitive.extend({
+  id: z.string().uuid(),
+});
+
+const registerUserSchema = z.object({
   email: z
     .string({
       required_error: 'Email is required',
@@ -15,28 +39,22 @@ const userCore = z.object({
       invalid_type_error: 'Password must be a string',
     })
     .min(8, 'Password must be at least 8 character long'),
-  name: z.string().min(2, 'Name must be at least 2 character long').optional(),
-  surname: z
-    .string()
-    .min(2, 'Surname must be at least 2 character long')
-    .optional(),
-  balance: z.number().optional(),
-});
-
-const userCoreWithoutSensitive = userCore.omit({ password: true });
-
-const userWithoutSensitive = userCoreWithoutSensitive.extend({
-  id: z.string().uuid(),
-});
-
-const registerUserSchema = userCore.extend({
   name: z.string().min(2, 'Name must be at least 2 character long'),
   surname: z.string().min(2, 'Surname must be at least 2 character long'),
 });
 
 const registerUserResponseSchema = userWithoutSensitive.extend({});
 
-const loginUserSchema = userCore.extend({});
+const loginUserSchema = z.object({
+  email: z.string({
+    required_error: 'Email is required',
+    invalid_type_error: 'Email must be a string',
+  }),
+  password: z.string({
+    required_error: 'Password is required',
+    invalid_type_error: 'Password must be a string',
+  }),
+});
 
 const loginUserResponseSchema = userWithoutSensitive.extend({});
 
