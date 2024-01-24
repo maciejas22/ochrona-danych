@@ -6,7 +6,7 @@ services:
     volumes:
       - ./crt:/crt
     entrypoint: bin/sh
-    command: -c "apk add openssl && openssl req -nodes -new -x509 -keyout /crt/key.pem -out /crt/cert.pem -subj '/CN=localhost'"
+    command: -c "apk add openssl && openssl req -nodes -new -x509 -keyout /crt/key.pem -out /crt/cert.pem -subj '/CN=localhost' && touch /crt/keygen_complete"
 
   ochrona-nginx:
     image: nginx
@@ -20,6 +20,7 @@ services:
       - ochrona-keygen
       - ochrona-backend
       - ochrona-frontend
+    command: /bin/sh -c "while [ ! -f /crt/keygen_complete ]; do sleep 1; done && nginx -g 'daemon off;'"
     networks:
       - ochrona-network
 
