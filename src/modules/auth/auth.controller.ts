@@ -77,6 +77,7 @@ export async function loginUserHandler(
   }>,
   reply: FastifyReply,
 ) {
+  await new Promise((resolve) => setTimeout(resolve, 2500));
   const body = request.body;
 
   try {
